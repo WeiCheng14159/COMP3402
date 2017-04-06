@@ -73,5 +73,6 @@ class State
 		
 		System.out.println("Change state from " + current_state + " to " + dest);
 		current_state = dest;
+		
 	}
 }
