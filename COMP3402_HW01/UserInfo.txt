@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 Michael:123
 M:12
 J:123
 Mi:321
 fdas:12
+=======
+Michael:12345
+Cheng:5678
+>>>>>>> d182c7046bcfdf0db09a333f92d4fb2daedda699
