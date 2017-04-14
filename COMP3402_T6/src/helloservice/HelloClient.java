@@ -1,7 +1,8 @@
+package helloservice;
 import javax.xml.ws.WebServiceRef;
-import helloservice.HelloService;
+//import helloservice.HelloService;
 import helloservice.Hello;
-   
+
 public class HelloClient {
    
    @WebServiceRef(wsdlLocation="http://localhost:8080/hellows/hello?wsdl")
