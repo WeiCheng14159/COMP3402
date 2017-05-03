@@ -36,16 +36,3 @@ public class Hello {
 	}
 
 }
-
-
-//We also need to write the DivideNumbersException used in the above program:
-//package helloservice;
-//public class DivideNumbersException extends Exception {
-//	 public DivideNumbersException(String message) {
-//	    super(message);
-//	 }
-//}
-//Explanation:
-//The annotation @WebService specifies that this class is meant as a web service.
-//Three methods are annotated with @WebMethod. That is, these methods are accessible by the clients.
-
