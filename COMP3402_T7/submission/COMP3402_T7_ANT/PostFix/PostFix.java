@@ -40,6 +40,10 @@ public class PostFix {
                 // TODO
 				double tmp = stack.pop();
 				stack.push( stack.pop() / tmp );
+			} else if(token.equals("^")) {
+                // TODO
+				double tmp = stack.pop();
+				stack.push( Math.pow( stack.pop() , tmp ) );
 			} else {
                 // TODO
 				stack.push( Double.parseDouble(token) );
