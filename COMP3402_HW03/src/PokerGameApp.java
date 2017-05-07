@@ -3,11 +3,11 @@ import java.rmi.RemoteException;
 import javax.swing.*;
 
 /**
- * POKER INTERFACE FOR RMI SERVICE
+ * CLIENT SERVER COMMUNICATION INTERFACE
  * @author chengwei
  *
  */
-public interface Poker extends Remote{
+public interface PokerGameApp extends Remote{
 	public boolean authenticate(String cmd_code, String u_name, String pw) throws RemoteException;
 	public String request(String cmd_code, String u_name, String pw) throws RemoteException;
 }

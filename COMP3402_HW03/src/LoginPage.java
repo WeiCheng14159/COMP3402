@@ -46,7 +46,7 @@ public class LoginPage extends Page{
 		return password.getText();
 	}
 	public void reset(){
-		user_name.setText("");
-		password.setText("");
+		user_name.setText("user name");
+		password.setText("password");
 	}
 }

@@ -20,4 +20,10 @@ public class Page {
 			frame.setLocation(window_x, window_y);
 		}
 	}
+	public void show(){
+		frame.setVisible(true);
+	}
+	public void hide(){
+		frame.setVisible(false);
+	}
 }

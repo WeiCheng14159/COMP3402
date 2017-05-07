@@ -46,8 +46,8 @@ public class RegisterPage extends Page{
 		return password_1.getText();
 	}
 	public void reset(){
-		user_name.setText("");
-		password.setText("");
-		password_1.setText("");
+		user_name.setText("user name");
+		password.setText("password here");
+		password_1.setText("confirm password here");
 	}
 }

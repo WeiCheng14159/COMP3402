@@ -2,8 +2,15 @@ import java.rmi.*;
 import java.rmi.server.*;
 import java.io.*;
 import java.util.*;
+
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.ObjectMessage;
 import javax.swing.*;
-public class GameServer extends UnicastRemoteObject implements Poker
+
+public class GameServer extends UnicastRemoteObject implements PokerGameApp
 {
 	private FileWriter db_info_writer;
 	private FileReader db_info_reader;
@@ -35,8 +42,8 @@ public class GameServer extends UnicastRemoteObject implements Poker
 		try {
 			GameServer app = new GameServer();
 			System.setSecurityManager(new SecurityManager());
-			Naming.rebind("Poker", app);
-			System.out.println("Service registered");
+			Naming.rebind("PokerGameApp", app);
+			System.out.println("Service registered with name PokerGameApp");
 		} catch(Exception e) {
 			System.err.println("Exception thrown: "+e);
 		}
@@ -235,9 +242,8 @@ public class GameServer extends UnicastRemoteObject implements Poker
 	}
 	
 	/**
-	 * AUTHENTICATE METHOD: HANDLE CLIENT AUTHENTICATE 
+	 * AUTHENTICATE METHOD: HANDLE CLIENT AUTHENTICATEION
 	 */
-	@Override
 	public boolean authenticate(String _command_code, String _user_name, String _user_password) throws RemoteException {
 		if ( _command_code.equals("login") || _command_code.equals("profile") || _command_code.equals("leader_board") || _command_code.equals("play_game")){
 			return login(_user_name, _user_password);
@@ -254,7 +260,6 @@ public class GameServer extends UnicastRemoteObject implements Poker
 	/**
 	 * REQUEST METHOD: HANDLE CLIENT REQUEST 
 	 */
-	@Override
 	public String request(String cmd_code, String u_name, String pw) throws RemoteException {
 		
 		if( !login(u_name, pw)){
@@ -272,4 +277,20 @@ public class GameServer extends UnicastRemoteObject implements Poker
 			return ("Unknown command code");
 		}
 	}
+	
+//	String host = "localhost";
+//	QueueReceiverExample receiver = null;
+//	try {
+//		receiver = new QueueReceiverExample(host);
+//		receiver.receiveMessages();
+//	} catch (NamingException | JMSException e) {
+//		System.err.println("Program aborted");
+//	} finally {
+//		if(receiver != null) {
+//			try {
+//				receiver.close();
+//			} catch (Exception e) { }
+//		}
+//	}
+
 }
