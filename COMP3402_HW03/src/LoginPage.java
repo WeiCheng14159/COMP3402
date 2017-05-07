@@ -1,8 +1,11 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+
 import javax.swing.*;
 
-public class LoginPage extends Page{
+public class LoginPage extends Page {
 
 	private JTextField user_name;
 	private JTextField password;
@@ -49,4 +52,22 @@ public class LoginPage extends Page{
 		user_name.setText("user name");
 		password.setText("password");
 	}
+
+//	@Override
+//	public void actionPerformed(ActionEvent e) {
+//		
+//		try {
+//			Registry registry = LocateRegistry.getRegistry( "localhost" );
+//			PokerGameApp app = (PokerGameApp)registry.lookup("PokerGameApp");
+//			if ( app.authenticate( "login", user_name.getText(), password.getText() ) == true){
+//
+//		    }
+//		    else{
+//		    	System.out.println("Fail to change state, button_command: login user_name:"+user_name+" password:"+password);
+//		    }
+//		} catch(Exception ex) {
+//		    System.err.println("Failed accessing RMI:"+ex);
+//		    return;
+//		}
+//	}
 }

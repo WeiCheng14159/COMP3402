@@ -76,9 +76,9 @@ public class ClientGUI{
 				_prev_state = sys_state.get_state();
 			}
 			
-			for (Page p : pages){
-				p.set_position(100, 100);
-			}
+//			for (Page p : pages){
+//				p.set_position(100, 100);
+//			}
 			
 			try{
 				Thread.sleep(10);
@@ -195,7 +195,7 @@ public class ClientGUI{
 				    if ( app.authenticate( button_command, login_page.get_user_name(), login_page.get_password() ) == true){
 				    	user_name =  login_page.get_user_name();
 						password = login_page.get_password();
-						game_page.u_name(user_name);	
+						game_page.set_user_name(user_name);	
 						sys_state.set_state("profile");
 				    }
 				    else{
@@ -227,7 +227,7 @@ public class ClientGUI{
 				    	sys_state.set_state("profile");
 				    	user_name = reg_page.get_user_name();
 				    	password = reg_page.get_pw();
-				    	game_page.u_name(user_name);
+				    	game_page.set_user_name(user_name);
 				    }else{
 				    	info_page.err_msg("User Name Taken");
 				    	sys_state.set_state("info");
