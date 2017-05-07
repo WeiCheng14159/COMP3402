@@ -1,13 +1,16 @@
 import java.rmi.*;
 import java.rmi.server.*;
+
 import java.io.*;
 import java.util.*;
+import java.util.Timer;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
+import javax.naming.NamingException;
 import javax.swing.*;
 
 public class GameServer extends UnicastRemoteObject implements PokerGameApp
@@ -26,11 +29,21 @@ public class GameServer extends UnicastRemoteObject implements PokerGameApp
 	private ArrayList<String> user_password_list = new ArrayList<String>();
 	private ArrayList<String> online_user_list = new ArrayList<String>();
 	
+	private ArrayList<CardGamePlayer> wait_list; 
+//	private ArrayList<ArrayList<CardGamePlayer>> player_list;
+	private ArrayList<CardGame> game_list;
+	
+	MessageConsumer queueReader;
+	MessageProducer topicSender;
+	
 	/**
 	 * PUBLIC GAMESERVER CONSTRUCTOR
 	 * @throws RemoteException
 	 */
-	public GameServer() throws RemoteException {
+	public GameServer() throws RemoteException, NamingException, JMSException{
+		jmsHelper = new JMSHelper();
+		wait_list = new ArrayList<CardGamePlayer>();
+		game_list = new ArrayList<CardGame>();
 		init_db();
 	}
 
@@ -44,6 +57,7 @@ public class GameServer extends UnicastRemoteObject implements PokerGameApp
 			System.setSecurityManager(new SecurityManager());
 			Naming.rebind("PokerGameApp", app);
 			System.out.println("Service registered with name PokerGameApp");
+			app.start();
 		} catch(Exception e) {
 			System.err.println("Exception thrown: "+e);
 		}
@@ -199,8 +213,26 @@ public class GameServer extends UnicastRemoteObject implements PokerGameApp
 	 * @param pw
 	 * @return
 	 */
-	public JPanel play_game(String u_name, String pw){
-		return new JPanel();
+	public String get_cards(String u_name) {
+		//search for the game the user belongs to
+		CardGamePlayer tmp = null;
+		for (CardGame g : this.game_list){
+			for(CardGamePlayer p : g.getPlayerList() ){
+				if(p.getName() == u_name ){
+					tmp = p;
+					for(Card card : g.getDeck().pop4() ){
+						p.addCard(card);
+						System.out.println( "user has card: " + card.toString() );
+					}
+				}
+			}
+		}
+		if (tmp != null ){
+			return tmp.getCardsInHand().toString();
+		}else{
+			return "";
+		}
+		
 	}
 	
 	/**
@@ -278,19 +310,145 @@ public class GameServer extends UnicastRemoteObject implements PokerGameApp
 		}
 	}
 	
-//	String host = "localhost";
-//	QueueReceiverExample receiver = null;
-//	try {
-//		receiver = new QueueReceiverExample(host);
-//		receiver.receiveMessages();
-//	} catch (NamingException | JMSException e) {
-//		System.err.println("Program aborted");
-//	} finally {
-//		if(receiver != null) {
-//			try {
-//				receiver.close();
-//			} catch (Exception e) { }
-//		}
-//	}
+	private JMSHelper jmsHelper;
+	public void start() throws JMSException {
+		queueReader = jmsHelper.createQueueReader();
+		topicSender = jmsHelper.createTopicSender();
+		
+		//create a new thread that is executed every 10 s 
+		Thread dispatch_thd = new Thread( new Dispath_thd() );
+		dispatch_thd.start();
+		
+		while(true) {
+			Message jmsMessage = receiveMessage(queueReader);
+			ChatMessage message = (ChatMessage)((ObjectMessage)jmsMessage).getObject();
+	        if(message != null && message.to.equals("server")) {
+	        	if(message.message.contains("Add:")){
+	        		System.out.println("New user: " + message);
+	        		add_wait( new CardGamePlayer(message.message.substring(4)) );
+	        	}else if(message.message.contains("Card:")){
+	        		System.out.println("New move: " + message);
+	        		///
+	        	}else{
+	        		System.out.println("Unkown command "+ message);
+	        	}
+	    
+	        }
+		}
+	}
+	
+	/**
+	 * add new user to game pairing list 
+	 * @param u
+	 */
+	private synchronized void add_wait ( CardGamePlayer u ){
+		if (!wait_list.contains(u)){
+			wait_list.add(u);
+		}else{
+			System.out.println("Error ! duplicate add request!");
+		}
+	}
+	
+	private synchronized void del_wait(CardGamePlayer s){
+		if(wait_list.contains(s)){
+			wait_list.remove(s);
+		}else{
+			System.err.println("No such user");
+		}
+	}
+	
+	private class Dispath_thd implements Runnable {
+//		private MessageProducer m; 
+		
+		@Override
+		 public void run() {
+			while(true){
+				if(wait_list.size() != 0)
+					System.out.println("Wait list users: " + wait_list.toString());
+				if( wait_list.size() >= 4 ){
+
+					//create new card game
+					game_list.add( new _24Game(wait_list.get(0), wait_list.get(1), wait_list.get(2), wait_list.get(3)));
+					
+					//send cards to user  
+					for (int i = 0 ; i < 3 ; i ++ ){
+						ChatMessage tmp = new ChatMessage("server", wait_list.get(i).getName(), ( "Card:" + get_cards(wait_list.get(i).getName().toString() ) ) );
+						try {	
+							Message jmsMessage = jmsHelper.createMessage( tmp );
+							broadcastMessage(GameServer.this.topicSender, jmsMessage);	
+						} catch (JMSException e) {
+							e.printStackTrace();
+						}
+					}
+						
+					//delete from wait list
+					for(int i = 0 ; i < 3 ; i ++)
+						del_wait(wait_list.get(0));
+
+				}else if ( wait_list.size() == 2 ){
+					
+					//create new card game
+					game_list.add( new _24Game( wait_list.get(0), wait_list.get(1) ) );
+					
+					//send cards to user  
+					for (int i = 0 ; i < 2 ; i ++ ){
+						ChatMessage tmp = new ChatMessage("server", wait_list.get(i).getName(), ( "Card:" + get_cards(wait_list.get(i).getName().toString() ) ) );
+						try {
+							Message jmsMessage = jmsHelper.createMessage( tmp );
+							broadcastMessage(GameServer.this.topicSender, jmsMessage);	
+						} catch (JMSException e) {
+							e.printStackTrace();
+						}
+					}
+						
+					//delete from wait list
+					for(int i = 0 ; i < 2 ; i ++)
+						del_wait(wait_list.get(0));
+				}
+				
+				try{
+					Thread.sleep(3000);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}	
+		}
+		
+		/**
+		 * create a new 23 game 
+		 */
+		private void new_game(){
+			
+		}
+	}
+	
+	/**
+	 * 
+	 * @param queueReader
+	 * @return
+	 * @throws JMSException
+	 */
+	public Message receiveMessage(MessageConsumer queueReader) throws JMSException {
+		try {
+	        Message jmsMessage = queueReader.receive();
+	        ChatMessage chatMessage = (ChatMessage)((ObjectMessage)jmsMessage).getObject();
+	        System.out.println("Receive message from user: " + chatMessage);
+	        return jmsMessage;
+	    } catch(JMSException e) {
+	        System.err.println("Failed to receive message "+e);
+	        throw e;
+	    }
+	}
+	
+	public void broadcastMessage(MessageProducer topicSender, Message jmsMessage) throws JMSException {
+		System.out.println("Sendint message to everyone: " + jmsMessage.toString() );
+		try {
+	        topicSender.send(jmsMessage);
+	    } catch(JMSException e) {
+	        System.err.println("Failed to boardcast message "+e);
+	        throw e;
+	    }
+	}
+
 
 }
