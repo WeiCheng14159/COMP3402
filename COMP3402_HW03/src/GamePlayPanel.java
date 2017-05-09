@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -16,6 +17,8 @@ import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 
 public class GamePlayPanel extends JPanel implements MouseListener, MessageListener{
+	private static JPanel cardImage;
+	private JTextArea input; 
 	private String name = "";
 	private String state = "initial";
 	String host = "localhost";
@@ -36,23 +39,18 @@ public class GamePlayPanel extends JPanel implements MouseListener, MessageListe
 		init_gui();
 //		init();
 	}
-
-//	private void init(){
-//		try {
-//	        Registry registry = LocateRegistry.getRegistry( host );
-//	        app = (PokerGameApp)registry.lookup("PokerGameApp");
-//		} catch(Exception ex) {
-//		    System.err.println("Failed accessing RMI: "+ex);
-//		    return;
-//		}
-//	}
 	
 	/**
 	 * initialize panel gui
 	 */
 	private void init_gui(){
 		this.addMouseListener(this);
-		this.add( new JLabel("New game") );
+		cardImage = new JPanel();
+		cardImage.add( new JLabel("New game") );
+		input = new JTextArea(1, 50);
+		this.setLayout( new GridLayout(2, 1) );
+		this.add(cardImage);
+		this.add(input);
 		this.setVisible(true);
 	}
 
@@ -64,8 +62,8 @@ public class GamePlayPanel extends JPanel implements MouseListener, MessageListe
 		if (state == "initial"){
 			System.out.println("Connecting to server");
 			new InformWorker().execute();
-			this.removeAll();
-			this.add(new JLabel("Waiting for players"));
+			cardImage.removeAll();
+			cardImage.add(new JLabel("Waiting for players"));
         	state = "wait";
 		}
 		this.revalidate();
@@ -107,7 +105,7 @@ public class GamePlayPanel extends JPanel implements MouseListener, MessageListe
         @Override  
         protected void done() {  
         	try {
-        		JPanel p = GamePlayPanel.this;
+        		JPanel p = GamePlayPanel.cardImage;
 			    p.removeAll();
 				if( !get() ){
 					p.add(new JLabel("Fail to inform server"));
@@ -163,8 +161,8 @@ public class GamePlayPanel extends JPanel implements MouseListener, MessageListe
 	 */
 	public void reset(){
 		this.state = "initial";
-		this.removeAll();
-		this.add( new JLabel("New game") );
+		cardImage.removeAll();
+		cardImage.add( new JLabel("New game") );
 		this.revalidate();
 		this.repaint();
 	}
@@ -174,15 +172,16 @@ public class GamePlayPanel extends JPanel implements MouseListener, MessageListe
 		try {
 	        ChatMessage chatMessage = (ChatMessage)((ObjectMessage)jmsMessage).getObject();
 	        
+	        System.out.println("Receive from server: " + chatMessage.toString() );
+	        
         	//this message if for you 
-        	if(chatMessage.message.contains("Card")){
-        		//here are your cards 
-	        	this.state = "play";
-	        	this.removeAll();
-	        	this.add(new JLabel("Raedy"));
-	        	this.revalidate();
-	        	this.repaint();
-        	}else if(chatMessage.message.contains("End")){
+        	if( chatMessage.message.contains("Card") ){
+        		String msg = chatMessage.message.substring(5); 
+        		System.out.println(msg);
+        		this.state = "play";
+        		createAndShowCardPanel( msg );
+	        	
+        	}else if( chatMessage.message.contains("End") ){
         		//end of the game 
         	}else{
         		//unknown command from server
@@ -193,13 +192,13 @@ public class GamePlayPanel extends JPanel implements MouseListener, MessageListe
 	        System.err.println("Failed to receive message");
 	    }
 	}
+	
+	void createAndShowCardPanel(String s ){
+		cardImage.removeAll();
+		String [] tmp = s.split(":");
 
-	private void createAndShowCards(String info){
-		String[] card_info = info.split(":");
-		System.out.println("info here: " + card_info);
-		this.removeAll();
-		for (int i = 1 ; i < card_info.length ; i=i+2){
-			this.add( new CardPanel( Integer.parseInt( card_info[i] ), Integer.parseInt( card_info[i+1] ) ) );
+		for (int i = 0 ; i < tmp.length ; i = i + 2){
+			cardImage.add( new CardPanel( Integer.parseInt(tmp[i]), Integer.parseInt(tmp[i+1]), 80, 100 ) );
 		}
 		this.revalidate();
 		this.repaint();

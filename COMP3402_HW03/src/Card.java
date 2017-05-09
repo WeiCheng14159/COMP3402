@@ -61,7 +61,7 @@ public class Card implements Comparable<Card> {
 	 * @return a string representation of a card
 	 */
 	public String toString() {
-		return "" + SUITS[this.suit] + RANKS[this.rank];
+		return "" + this.suit + ":" + this.rank;
 	}
 
 	/**

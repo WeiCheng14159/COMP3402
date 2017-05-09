@@ -150,6 +150,7 @@ public class ClientGUI{
 				try {
 			        if ( app.authenticate(button_command, user_name, password) == true ){
 			        	sys_state.set_state("login");
+			        	game_page.reset();
 				    }else{
 				    	System.out.println("Fail to change state, button_command: "+button_command+ " user_name: "+user_name+" password: "+password);
 				    }

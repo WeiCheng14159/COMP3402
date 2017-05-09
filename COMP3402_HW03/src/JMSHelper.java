@@ -108,10 +108,10 @@ public class JMSHelper {
 	}
 	public MessageConsumer createTopicReader(String name) throws JMSException {
 	    try {
-	        name = name.replace("'", "''");
+			name = name.replace("'", "''");
 	        String selector = "(privateMessageFrom IS NULL AND privateMessageTo IS NULL) OR "+
 	                           "privateMessageTo = '"+name+"' OR privateMessageFrom = '"+name+"'";
-	        
+	       
 	        return createSession().createConsumer(topic, selector);
 	    } catch (JMSException e) {
 	        System.err.println("Failed reading from queue: " + e);

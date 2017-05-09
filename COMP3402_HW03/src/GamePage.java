@@ -14,7 +14,8 @@ public class GamePage extends Page{
     final static String LOGOUT_PANEL = "Logout";
   	private GamePlayPanel game_play_panel; 
     final static int extraWindowWidth = 500;
- 
+    final static int Height = 300;
+    
 //    public GamePage(ActionListener a, MouseListener m){
 //    	return2LoginPageBtn = a;
 //    	inforServerBtn = m;
@@ -54,6 +55,7 @@ public class GamePage extends Page{
             public Dimension getPreferredSize() {
                 Dimension size = super.getPreferredSize();
                 size.width += extraWindowWidth;
+                size.height = Height;
                 return size;
             }
         };

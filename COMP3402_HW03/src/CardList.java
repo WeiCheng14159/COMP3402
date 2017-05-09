@@ -179,9 +179,9 @@ public class CardList {
 		String string = "";
 		if (cards.size() > 0) {
 			for (int i = 0; i < cards.size(); i++) {
-				string = string + "[" + cards.get(i) + "]";
+				string = string + cards.get(i) ;
 				if (i != cards.size() - 1) {
-					string = string + " ";
+					string = string + ":";
 				}
 			}
 		} else {

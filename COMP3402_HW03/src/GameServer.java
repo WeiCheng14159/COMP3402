@@ -372,9 +372,11 @@ public class GameServer extends UnicastRemoteObject implements PokerGameApp
 					
 					//send cards to user  
 					for (int i = 0 ; i < 3 ; i ++ ){
-						ChatMessage tmp = new ChatMessage("server", wait_list.get(i).getName(), ( "Card:" + get_cards(wait_list.get(i).getName().toString() ) ) );
+						ChatMessage tmp = new ChatMessage("server", wait_list.get(i).getName(), ( "Card:" + get_cards(wait_list.get(i).getName() ) ) );
 						try {	
 							Message jmsMessage = jmsHelper.createMessage( tmp );
+							jmsMessage.setStringProperty("privateMessageTo", tmp.to);
+				            jmsMessage.setStringProperty("privateMessageFrom", tmp.from);
 							broadcastMessage(GameServer.this.topicSender, jmsMessage);	
 						} catch (JMSException e) {
 							e.printStackTrace();
@@ -392,9 +394,12 @@ public class GameServer extends UnicastRemoteObject implements PokerGameApp
 					
 					//send cards to user  
 					for (int i = 0 ; i < 2 ; i ++ ){
-						ChatMessage tmp = new ChatMessage("server", wait_list.get(i).getName(), ( "Card:" + get_cards(wait_list.get(i).getName().toString() ) ) );
+						ChatMessage tmp = new ChatMessage("server", wait_list.get(i).getName(), ( "Card:" + get_cards(wait_list.get(i).getName() ) ) );
+						System.out.println(tmp.toString());
 						try {
 							Message jmsMessage = jmsHelper.createMessage( tmp );
+							jmsMessage.setStringProperty("privateMessageTo", tmp.to);
+				            jmsMessage.setStringProperty("privateMessageFrom", tmp.from);
 							broadcastMessage(GameServer.this.topicSender, jmsMessage);	
 						} catch (JMSException e) {
 							e.printStackTrace();
@@ -441,7 +446,7 @@ public class GameServer extends UnicastRemoteObject implements PokerGameApp
 	}
 	
 	public void broadcastMessage(MessageProducer topicSender, Message jmsMessage) throws JMSException {
-		System.out.println("Sendint message to everyone: " + jmsMessage.toString() );
+		System.out.println("Sendint message to everyone: " + jmsMessage.getJMSMessageID() );
 		try {
 	        topicSender.send(jmsMessage);
 	    } catch(JMSException e) {
