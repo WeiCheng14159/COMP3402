@@ -1,3 +1,4 @@
+import java.util.EmptyStackException;
 import java.util.Stack;
 
 /**
@@ -7,17 +8,27 @@ import java.util.Stack;
  */
 public class InfixPostfixEvaluator {
 
-		public static void main(String [] args){
-			System.out.println( "Number: " + new InfixPostfixEvaluator().evalInfix("A+Q-1+3") );
-		}
+//		public static void main(String [] args){
+//			try {
+//				System.out.println( "Number: " + new InfixPostfixEvaluator().evalInfix("10+A-Q") );
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
 	
+		private String number10Converter(String s){
+			return s.replaceAll("10", "I");
+		}
+		
         /**
          * Operators in reverse order of precedence.
          */
         private static final String operators = "-+/*";
-        private static final String operands = "0123456789AJQK";
+        private static final String operands = "0123456789AJQKI";
 
-        public double evalInfix(String infix) {
+        public double evalInfix(String infix) throws Exception {
+        	infix = number10Converter(infix);
                 return evaluatePostfix(convert2Postfix(infix));
         }
 
@@ -55,13 +66,16 @@ public class InfixPostfixEvaluator {
                 return out.toString();
         }
 
-        public double evaluatePostfix(String postfixExpr) {
+        public double evaluatePostfix(String postfixExpr) throws Exception {
+        		postfixExpr = number10Converter(postfixExpr);
                 char[] chars = postfixExpr.toCharArray();
                 Stack<Double> stack = new Stack<Double>();
                 for (char c : chars) {
                         if (isOperand(c)) {
                         	if(c == 'A'){
                         		stack.push(1.0); // convert char to int val
+                        	}else if( c == 'I'){
+                        		stack.push(10.0); // convert char to int val
                         	}else if( c == 'J'){
                         		stack.push(11.0); // convert char to int val
                         	}else if( c == 'Q'){
@@ -72,8 +86,15 @@ public class InfixPostfixEvaluator {
                         		stack.push((double)(c - '0')); // convert char to int val
                         	}
                         } else if (isOperator(c)) {
-                                double op1 = stack.pop();
-                                double op2 = stack.pop();
+                        		double op1 = 0;
+                        		double op2 = 0;
+                        		try{
+                        			op1 = stack.pop();
+                                    op2 = stack.pop();
+                        		}catch(EmptyStackException e){
+                        			e.printStackTrace();
+                        			throw new Exception("Format Wrong");
+                        		}
                                 double result;
                                 switch (c) {
                                 case '*':

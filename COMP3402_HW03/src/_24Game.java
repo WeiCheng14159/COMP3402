@@ -9,6 +9,15 @@ public class _24Game implements CardGame {
 	private ArrayList<CardGamePlayer> player_list;
 	private Deck deck = new _24Deck();
 	private int idx = 0;
+	private String best_sol = "";
+	
+	public String get_best_sol(){
+		return this.best_sol;
+	}
+	
+	public void set_best_sol(String s){
+		this.best_sol = s;
+	}
 	
 	public _24Game(CardGamePlayer a, CardGamePlayer b){
 		player_list = new ArrayList<CardGamePlayer>();

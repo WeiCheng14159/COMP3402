@@ -81,7 +81,7 @@ public class ClientGUI{
 //			}
 			
 			try{
-				Thread.sleep(10);
+				Thread.sleep(500);
 			}catch(Exception e){
 				System.out.println("Fail to update views cuz" + e.getMessage());
 			}
@@ -241,42 +241,4 @@ public class ClientGUI{
 			}
 		}
 	}	 
-	 
-	 /**
-	  * INFORM SERVER BUTTON 
-	  */
-//	 class InformServerButton implements MouseListener{
-//
-//		@Override
-//		public void mouseClicked(MouseEvent e) {
-//			// TODO Auto-generated method stub
-//			
-//		}
-//
-//		@Override
-//		public void mousePressed(MouseEvent e) {
-//			// TODO Auto-generated method stub
-//			
-//		}
-//
-//		@Override
-//		public void mouseReleased(MouseEvent e) {
-//			// TODO Auto-generated method stub
-//			
-//		}
-//
-//		@Override
-//		public void mouseEntered(MouseEvent e) {
-//			// TODO Auto-generated method stub
-//			
-//		}
-//
-//		@Override
-//		public void mouseExited(MouseEvent e) {
-//			// TODO Auto-generated method stub
-//			
-//		}
-//
-//		 
-//	 }
 }

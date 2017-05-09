@@ -55,4 +55,8 @@ public interface CardGame {
 	 * @return true if the game ends; false otherwise
 	 */
 	public boolean endOfGame();
+	
+	public String get_best_sol();
+	
+	public void set_best_sol(String s);
 }

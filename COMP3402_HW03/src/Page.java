@@ -26,4 +26,10 @@ public class Page {
 	public void hide(){
 		frame.setVisible(false);
 	}
+	
+	public void repaint(){
+		this.frame.revalidate();
+		this.frame.repaint();
+	}
+	
 }

@@ -9,11 +9,14 @@ import java.util.StringTokenizer;
  */
 public class CardGamePlayer {
 	private static int playerId = 0;
-
-	private int score = 0;
+	private boolean done = false; 
+	private double score = 0;
 	private String name = "";
 	private CardList cardsInHand = new CardList();
-
+	private int played = 0;
+	private int win = 0;
+	private String sol = "";
+	
 	/**
 	 * Creates and returns an instance of the Player class.
 	 */
@@ -22,6 +25,22 @@ public class CardGamePlayer {
 		playerId++;
 	}
 
+	public void setSolution(String s){
+		this.sol = s;
+	}
+	
+	public String getSolution(){
+		return this.sol;
+	}
+	
+	public void done(){
+		this.done = true;
+	}
+	
+	public boolean donna(){
+		return this.done;
+	}
+	
 	/**
 	 * Creates and returns an instance of the Player class.
 	 * 
@@ -56,7 +75,7 @@ public class CardGamePlayer {
 	 * 
 	 * @return the score of this player
 	 */
-	public int getScore() {
+	public double getScore() {
 		return this.score;
 	}
 
@@ -66,20 +85,14 @@ public class CardGamePlayer {
 	 * @param score
 	 *            the score of this player
 	 */
-	public void setScore(int score) {
+	public void setScore(double score) {
 		this.score = score;
 	}
 
-	/**
-	 * Adds the specified score to this player.
-	 * 
-	 * @param score
-	 *            the specified score to be added to this player
-	 */
-	public void addScore(int score) {
-		this.score += score;
+	public void resetScore(double score){
+		this.score = 0.0f;
 	}
-
+	
 	/**
 	 * Adds the specified card to this player.
 	 * 
@@ -171,5 +184,20 @@ public class CardGamePlayer {
 		} else {
 			return cards;
 		}
+	}
+	
+	void addWinGame(){
+		this.win ++;
+	}
+	
+	void addPlayedGame(){
+		this.played ++;
+	}
+	
+	float getWinRate(){
+		if(this.played == 0)
+			return 0.0f;
+		else
+			return ((float)this.win/(float)this.played);
 	}
 }

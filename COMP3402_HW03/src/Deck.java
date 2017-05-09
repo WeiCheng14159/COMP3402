@@ -46,8 +46,8 @@ public class Deck extends CardList {
 	public ArrayList<Card> pop4(){
 		ArrayList<Card> hand = new ArrayList<Card>();
 		for( int i = 0 ; i < 4 ; i++){
-			hand.add(super.getCard(0));
-			super.removeCard(0);
+			hand.add(super.getCard(i));
+//			super.removeCard(0);
 		}
 		return hand;
 	}

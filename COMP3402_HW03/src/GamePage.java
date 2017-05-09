@@ -1,31 +1,29 @@
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import javax.swing.*;
 
 public class GamePage extends Page{
-	private String u_name;
     private ActionListener return2LoginPageBtn; 
-    private MouseListener inforServerBtn;
 	final static String USER_PROFILE_PANEL = "User Profile";
     final static String PLAY_GAME_PANEL = "Play Game";
     final static String LEADER_BOARD_PANEL = "Leader Board";
     final static String LOGOUT_PANEL = "Logout";
   	private GamePlayPanel game_play_panel; 
-    final static int extraWindowWidth = 500;
-    final static int Height = 300;
+  	private ProfilePagePanel profile_panel; 
+  	private LeaderPagePanel leader_panel; 
+    private final static int extraWindowWidth = 500;
+    private final static int Height = 500;
     private final String host; 
-    
-//    public GamePage(ActionListener a, MouseListener m){
-//    	return2LoginPageBtn = a;
-//    	inforServerBtn = m;
-//    	createGUI();
-//    }
+    PokerGameApp app;
+
     public GamePage(ActionListener a, String _host){
     	host = _host; 
     	return2LoginPageBtn = a;
-//    	inforServerBtn = m;
     	createGUI();
     }
     
@@ -43,48 +41,28 @@ public class GamePage extends Page{
         this.addComponentToPane(frame.getContentPane());
  
         //Display the window.
-        frame.pack();
+//        frame.pack();
     }
     
     public void addComponentToPane(Container pane) {
         JTabbedPane tabbedPane = new JTabbedPane();
- 
-        //Create the "cards".
-        JPanel card1 = new JPanel() {
-            //Make the panel wider than it really needs, so
-            //the window's wide enough for the tabs to stay
-            //in one row.
-            public Dimension getPreferredSize() {
-                Dimension size = super.getPreferredSize();
-                size.width += extraWindowWidth;
-                size.height = Height;
-                return size;
-            }
-        };
-        card1.add(new JButton("New Game"));
+        
+        super.frame.setSize( super.frame.getWidth() + extraWindowWidth, Height );
+        
+        profile_panel = new ProfilePagePanel( host, "" ); 
         
         game_play_panel = new GamePlayPanel( host );
  
-        JPanel card3 = new LeaderBoardPanel();
- 
+        leader_panel = new LeaderPagePanel( host );
+        
         JPanel card4 = new LogoutPanel( return2LoginPageBtn );
  
-        tabbedPane.addTab(USER_PROFILE_PANEL, card1);
+        tabbedPane.addTab(USER_PROFILE_PANEL, profile_panel);
         tabbedPane.addTab(PLAY_GAME_PANEL, game_play_panel);
-        tabbedPane.addTab(LEADER_BOARD_PANEL, card3);
+        tabbedPane.addTab(LEADER_BOARD_PANEL, leader_panel);
         tabbedPane.addTab(LOGOUT_PANEL, card4);
         
         pane.add(tabbedPane, BorderLayout.CENTER);
-    }
- 
-   
-    
-    public void showGUI(){
-    	frame.setVisible(true);
-    }
-
-    public void hideGUI(){
-    	frame.setVisible(false);
     }
     
     public void reset(){
@@ -92,7 +70,7 @@ public class GamePage extends Page{
     }
     
     public void set_user_name(String name){
-    	game_play_panel.set_name(name);;
+    	game_play_panel.set_name(name);
+    	profile_panel.update_name(host, name);
     }
-
 }
