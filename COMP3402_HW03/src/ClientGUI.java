@@ -44,7 +44,7 @@ public class ClientGUI{
 		reg_page = new RegisterPage	     ( new RequestButton("register", host, "register"), new ChangeStateButton("cancel", "login"));
 				
 		//create new game page 
-		game_page = new GamePage         ( new AuthButton("logout" ,host , "login") );
+		game_page = new GamePage         ( new AuthButton("logout" ,host , "login"), host);
 
 		pages = new ArrayList<Page>();
 		pages.add(login_page); 

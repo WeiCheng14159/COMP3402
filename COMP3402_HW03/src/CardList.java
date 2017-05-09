@@ -182,6 +182,7 @@ public class CardList {
 				string = string + cards.get(i) ;
 				if (i != cards.size() - 1) {
 					string = string + ":";
+
 				}
 			}
 		} else {

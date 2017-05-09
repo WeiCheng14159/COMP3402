@@ -15,13 +15,15 @@ public class GamePage extends Page{
   	private GamePlayPanel game_play_panel; 
     final static int extraWindowWidth = 500;
     final static int Height = 300;
+    private final String host; 
     
 //    public GamePage(ActionListener a, MouseListener m){
 //    	return2LoginPageBtn = a;
 //    	inforServerBtn = m;
 //    	createGUI();
 //    }
-    public GamePage(ActionListener a){
+    public GamePage(ActionListener a, String _host){
+    	host = _host; 
     	return2LoginPageBtn = a;
 //    	inforServerBtn = m;
     	createGUI();
@@ -61,7 +63,7 @@ public class GamePage extends Page{
         };
         card1.add(new JButton("New Game"));
         
-        game_play_panel = new GamePlayPanel();
+        game_play_panel = new GamePlayPanel( host );
  
         JPanel card3 = new LeaderBoardPanel();
  

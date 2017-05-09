@@ -322,18 +322,47 @@ public class GameServer extends UnicastRemoteObject implements PokerGameApp
 		while(true) {
 			Message jmsMessage = receiveMessage(queueReader);
 			ChatMessage message = (ChatMessage)((ObjectMessage)jmsMessage).getObject();
+			
 	        if(message != null && message.to.equals("server")) {
+	        	
 	        	if(message.message.contains("Add:")){
 	        		System.out.println("New user: " + message);
 	        		add_wait( new CardGamePlayer(message.message.substring(4)) );
-	        	}else if(message.message.contains("Card:")){
-	        		System.out.println("New move: " + message);
-	        		///
+	        		
+	        	}else if(message.message.contains("Move:")){
+	        		System.out.println("Msg: " + message);
+	        		double result = makeMove( message.message.substring(5), message.from );
+	        		
+	        		jmsMessage = jmsHelper.createMessage( new ChatMessage("server", message.from, "Score:" + result ) );
+					jmsMessage.setStringProperty("privateMessageTo", message.from);
+		            jmsMessage.setStringProperty("privateMessageFrom", "server");
+
+					broadcastMessage(topicSender, jmsMessage);	
 	        	}else{
 	        		System.out.println("Unkown command "+ message);
 	        	}
 	    
 	        }
+		}
+	}
+	
+	double makeMove(String token, String _name){
+		System.out.printf("Token: %s, name: %s", token, _name);
+		CardGamePlayer player = null;
+		for(CardGame g : game_list){
+			for(CardGamePlayer p : g.getPlayerList() ){
+				if( p.getName().equals(_name) )
+					player = p;
+			}
+		}
+		
+		if( player != null){
+			double r = new InfixPostfixEvaluator().evalInfix(token);
+			System.out.printf("User: %s Move: %s Total: %f", _name, token.toString(), r );
+			return r;
+		}else{
+			System.out.println("No such user" );
+			return -1;
 		}
 	}
 	
@@ -377,6 +406,7 @@ public class GameServer extends UnicastRemoteObject implements PokerGameApp
 							Message jmsMessage = jmsHelper.createMessage( tmp );
 							jmsMessage.setStringProperty("privateMessageTo", tmp.to);
 				            jmsMessage.setStringProperty("privateMessageFrom", tmp.from);
+
 							broadcastMessage(GameServer.this.topicSender, jmsMessage);	
 						} catch (JMSException e) {
 							e.printStackTrace();
@@ -400,6 +430,7 @@ public class GameServer extends UnicastRemoteObject implements PokerGameApp
 							Message jmsMessage = jmsHelper.createMessage( tmp );
 							jmsMessage.setStringProperty("privateMessageTo", tmp.to);
 				            jmsMessage.setStringProperty("privateMessageFrom", tmp.from);
+
 							broadcastMessage(GameServer.this.topicSender, jmsMessage);	
 						} catch (JMSException e) {
 							e.printStackTrace();
@@ -447,6 +478,7 @@ public class GameServer extends UnicastRemoteObject implements PokerGameApp
 	
 	public void broadcastMessage(MessageProducer topicSender, Message jmsMessage) throws JMSException {
 		System.out.println("Sendint message to everyone: " + jmsMessage.getJMSMessageID() );
+
 		try {
 	        topicSender.send(jmsMessage);
 	    } catch(JMSException e) {

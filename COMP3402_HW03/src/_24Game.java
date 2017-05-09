@@ -58,8 +58,7 @@ public class _24Game implements CardGame {
 
 	@Override
 	public void checkMove(int[] cardIdx) {
-		// TODO Auto-generated method stub
-		//24 game logic here
+		
 	}
 
 	@Override

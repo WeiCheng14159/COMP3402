@@ -7,7 +7,6 @@ public class CardPanel extends JPanel {
 
 	int suit;
 	int num;
-	
 	public CardPanel(int s, int n, int width, int height) {
 		this.suit = s;
 		this.num = n;
@@ -18,6 +17,5 @@ public class CardPanel extends JPanel {
 //		Image i = new ImageIcon("images/04.gif").getImage();
 		g.drawImage(i, 0, 0, this);
 	}
-	
-	
+
 }

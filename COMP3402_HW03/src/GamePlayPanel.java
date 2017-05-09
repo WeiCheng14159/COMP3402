@@ -3,6 +3,7 @@ import java.awt.event.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -17,54 +18,76 @@ import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 
 public class GamePlayPanel extends JPanel implements MouseListener, MessageListener{
-	private static JPanel cardImage;
-	private JTextArea input; 
+	private static JPanel cardImageBox;
+	private JTextArea messageBox; 
+	private JLabel scoreBox;
+	private JPanel playerBox;
 	private String name = "";
-	private String state = "initial";
+	private final String [] all_state = {"initial", "wait", "play", "end"};
+	private String state = all_state[0];
 	String host = "localhost";
 	private JMSHelper jmsHelper;
 	private MessageProducer queueSender;
 	private MessageConsumer topicReceiver;
-	/**
-	 * 	state = 0 initial
-	 	state = 1 wait 
-		state = 2 play 
-		state = 3 end
-	 */
 	
 	/**
 	 * GamePlayPanel constructor
 	 */
-	public GamePlayPanel() {
+	public GamePlayPanel(String _host) {
 		init_gui();
-//		init();
+		init(_host);
 	}
+
 	
 	/**
 	 * initialize panel gui
 	 */
 	private void init_gui(){
 		this.addMouseListener(this);
-		cardImage = new JPanel();
-		cardImage.add( new JLabel("New game") );
-		input = new JTextArea(1, 50);
-		this.setLayout( new GridLayout(2, 1) );
-		this.add(cardImage);
-		this.add(input);
+		cardImageBox = new JPanel();
+		cardImageBox.add( new JLabel("New game") );
+		messageBox = new JTextArea("Type your move here", 1, 50);
+		scoreBox = new JLabel("n/a");
+		playerBox = new JPanel();
+		this.setLayout( new GridLayout(2, 2) );
+		this.add(cardImageBox);
+		this.add(messageBox);
+		this.add(playerBox);
+		this.add(scoreBox);
 		this.setVisible(true);
+		
+		messageBox.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+					sendMessage( new ChatMessage(name, "server", "Move:"+messageBox.getText() ) );
+					messageBox.setText("");
+				}
+			}
+		});
 	}
-
+	
+	/**
+	 * initialize 
+	 */
+	void init(String _host){
+		this.host = _host;
+	}
+	
 	/**
 	 * MouseListener interface
 	 */
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if (state == "initial"){
-			System.out.println("Connecting to server");
+		if ( state == all_state[0] ){
+			System.out.println("Connecting to server ... ");
 			new InformWorker().execute();
-			cardImage.removeAll();
-			cardImage.add(new JLabel("Waiting for players"));
-        	state = "wait";
+			cardImageBox.removeAll();
+			cardImageBox.add(new JLabel("Waiting for players"));
+        	state = all_state[1];
+		}else if ( state == all_state[3] ){
+			state = all_state[0];
+			cardImageBox = new JPanel();
+			cardImageBox.add( new JLabel("New game") );
 		}
 		this.revalidate();
 		this.repaint();
@@ -105,19 +128,19 @@ public class GamePlayPanel extends JPanel implements MouseListener, MessageListe
         @Override  
         protected void done() {  
         	try {
-        		JPanel p = GamePlayPanel.cardImage;
-			    p.removeAll();
-				if( !get() ){
-					p.add(new JLabel("Fail to inform server"));
+		    	
+		    	if( !get() ){
+		    		JPanel p = GamePlayPanel.cardImageBox;
+			    	p.removeAll();
+					p.add(new JLabel("Fail to connect to server"));
 					System.err.println("Fail to connect to server");
+					p.revalidate();
+				    p.repaint();
 				}
-				p.revalidate();
-			    p.repaint();
+				
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
         }  
@@ -145,6 +168,7 @@ public class GamePlayPanel extends JPanel implements MouseListener, MessageListe
 				message.setStringProperty("privateMessageTo", "server");
 				message.setStringProperty("privateMessageFrom", name);
 			} catch (JMSException e) {
+			
 			}
 			if(message != null) {
 				try {
@@ -160,9 +184,9 @@ public class GamePlayPanel extends JPanel implements MouseListener, MessageListe
 	 * reset the game play panel when logout
 	 */
 	public void reset(){
-		this.state = "initial";
-		cardImage.removeAll();
-		cardImage.add( new JLabel("New game") );
+		this.state = all_state[0];
+		cardImageBox.removeAll();
+		cardImageBox.add( new JLabel("New game") );
 		this.revalidate();
 		this.repaint();
 	}
@@ -174,32 +198,56 @@ public class GamePlayPanel extends JPanel implements MouseListener, MessageListe
 	        
 	        System.out.println("Receive from server: " + chatMessage.toString() );
 	        
-        	//this message if for you 
         	if( chatMessage.message.contains("Card") ){
-        		String msg = chatMessage.message.substring(5); 
-        		System.out.println(msg);
-        		this.state = "play";
-        		createAndShowCardPanel( msg );
+        		this.state = all_state[2];
+        		createAndShowCardPanel( chatMessage.message.substring(5) );
 	        	
         	}else if( chatMessage.message.contains("End") ){
-        		//end of the game 
+        		this.state = all_state[3]; 
+        		System.out.println( chatMessage.message.substring(5) );
+        		endGamePanel( chatMessage.message.substring(5) );
+        	}else if( chatMessage.message.contains("Score") ){
+        		updateScore( chatMessage.message.substring(6) );
+        	}else if( chatMessage.message.contains("Player") ){
+        		updatePlayer( chatMessage.message.substring(7) );
         	}else{
-        		//unknown command from server
         		System.out.println("Unknown command from server: " + chatMessage);
         	}
-	        
 	    } catch (JMSException e) {
 	        System.err.println("Failed to receive message");
 	    }
 	}
 	
+	void updateScore(String s){
+		System.out.println("Update score"+s);
+		try{
+			this.scoreBox.setText("Score="+s);
+		}catch (Exception e){
+			this.scoreBox.setText("Error");
+		}
+		this.revalidate();
+		this.repaint();
+	}
+	
+	void updatePlayer(String s){
+		
+	}
+	
 	void createAndShowCardPanel(String s ){
-		cardImage.removeAll();
+		cardImageBox.removeAll();
 		String [] tmp = s.split(":");
 
 		for (int i = 0 ; i < tmp.length ; i = i + 2){
-			cardImage.add( new CardPanel( Integer.parseInt(tmp[i]), Integer.parseInt(tmp[i+1]), 80, 100 ) );
+			cardImageBox.add( new CardPanel( Integer.parseInt(tmp[i]), Integer.parseInt(tmp[i+1]), 80, 100 ) );
+
+		this.revalidate();
+		this.repaint();
 		}
+	}
+	
+	void endGamePanel( String msg_from_server ){
+		cardImageBox.removeAll();
+		cardImageBox.add( new JLabel( msg_from_server ) );
 		this.revalidate();
 		this.repaint();
 	}
