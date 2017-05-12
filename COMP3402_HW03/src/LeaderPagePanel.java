@@ -19,11 +19,7 @@ public class LeaderPagePanel extends JPanel{
 	 */
 	private void init_gui(){
 		this.setLayout( new BorderLayout() );
-		try {
-			this.add( app.leader_board( name ) , BorderLayout.NORTH);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
+		this.add( new JLabel("init") , BorderLayout.NORTH);
 		this.setVisible(true);
 	}
 	
@@ -35,10 +31,36 @@ public class LeaderPagePanel extends JPanel{
     	try {
 			Registry registry = LocateRegistry.getRegistry( _host );
 			app = (PokerGameApp)registry.lookup("PokerGameApp");
-			System.out.println( app.toString() );
 		} catch(Exception ex) {
 		    System.err.println("Failed accessing RMI:"+ex);
 		    return;
 		}
+    }
+    
+    public void update_board( String _name ){
+    	name = _name;
+    	this.removeAll();
+    	try {
+			this.add( app.leader_board( name ) , BorderLayout.NORTH);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+    	this.revalidate();
+    	this.repaint();
+    }
+    
+    public void refresh(){
+    	this.removeAll();
+    	if( name != "" ){
+    		try {
+    			this.add( app.leader_board( name ) , BorderLayout.NORTH);
+    		} catch (RemoteException e) {
+    			e.printStackTrace();
+    		}
+    	}else{
+    		this.add( new JLabel("") );
+    	}
+    	this.revalidate();
+    	this.repaint();
     }
 }

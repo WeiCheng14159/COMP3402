@@ -1,5 +1,9 @@
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -7,7 +11,7 @@ import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import javax.swing.*;
 
-public class GamePage extends Page{
+public class GamePage extends Page implements MouseListener{
     private ActionListener return2LoginPageBtn; 
 	final static String USER_PROFILE_PANEL = "User Profile";
     final static String PLAY_GAME_PANEL = "Play Game";
@@ -20,7 +24,8 @@ public class GamePage extends Page{
     private final static int Height = 500;
     private final String host; 
     PokerGameApp app;
-
+    JTabbedPane tabbedPane;
+    
     public GamePage(ActionListener a, String _host){
     	host = _host; 
     	return2LoginPageBtn = a;
@@ -45,32 +50,59 @@ public class GamePage extends Page{
     }
     
     public void addComponentToPane(Container pane) {
-        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane = new JTabbedPane();
+        tabbedPane.addMouseListener(this);
         
         super.frame.setSize( super.frame.getWidth() + extraWindowWidth, Height );
         
-        profile_panel = new ProfilePagePanel( host, "" ); 
+        profile_panel = new ProfilePagePanel( host ); 
         
         game_play_panel = new GamePlayPanel( host );
  
         leader_panel = new LeaderPagePanel( host );
         
-        JPanel card4 = new LogoutPanel( return2LoginPageBtn );
+        JPanel logout_panel = new LogoutPanel( return2LoginPageBtn );
  
         tabbedPane.addTab(USER_PROFILE_PANEL, profile_panel);
         tabbedPane.addTab(PLAY_GAME_PANEL, game_play_panel);
         tabbedPane.addTab(LEADER_BOARD_PANEL, leader_panel);
-        tabbedPane.addTab(LOGOUT_PANEL, card4);
+        tabbedPane.addTab(LOGOUT_PANEL, logout_panel);
         
         pane.add(tabbedPane, BorderLayout.CENTER);
     }
     
     public void reset(){
     	game_play_panel.reset();
+    	this.tabbedPane.setSelectedIndex(0);
     }
     
     public void set_user_name(String name){
     	game_play_panel.set_name(name);
-    	profile_panel.update_name(host, name);
+    	profile_panel.update_profile(name);
+    	leader_panel.update_board(name);
     }
+    
+	public void show(){
+		profile_panel.refresh();
+		leader_panel.refresh();
+		frame.setVisible(true);
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		profile_panel.refresh();
+		leader_panel.refresh();
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {}
+
+	@Override
+	public void mouseExited(MouseEvent e) {}
 }

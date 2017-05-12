@@ -184,7 +184,6 @@ public class ClientGUI{
 			try {
 				Registry registry = LocateRegistry.getRegistry( host_addr );
 				app = (PokerGameApp)registry.lookup("PokerGameApp");
-				System.out.println( app.toString() );
 			} catch(Exception ex) {
 			    System.err.println("Failed accessing RMI:"+ex);
 			    return;

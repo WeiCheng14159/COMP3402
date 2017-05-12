@@ -226,6 +226,7 @@ public class GamePlayPanel extends JPanel implements MouseListener, MessageListe
         	}else{
         		System.out.println("Unknown command from server: " + chatMessage);
         	}
+        	
 	    } catch (JMSException e) {
 	        System.err.println("Failed to receive message");
 	    }
@@ -249,11 +250,10 @@ public class GamePlayPanel extends JPanel implements MouseListener, MessageListe
 		for (String u : user){
 			String [] tmp = u.split("_");
 			if( tmp[0].equals(name) ){
-				this.playerBox.add( new JLabel("(You): "+tmp[0]+", Win Games: "+tmp[1]+", Win_rate: "+tmp[2]) );
+				this.playerBox.add( new JLabel("(You) : "+tmp[0]+" "+tmp[1] ) );
 			}else{
-				this.playerBox.add( new JLabel("Name: "+tmp[0]+", Win Games: "+tmp[1]+", Win_rate: "+tmp[2]) );
+				this.playerBox.add( new JLabel("Name: "+tmp[0]+" "+tmp[1] ) );
 			}
-			
 		}
 		
 		for ( Component c : this.playerBox.getComponents() ){
