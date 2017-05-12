@@ -13,8 +13,8 @@ public class CardGamePlayer {
 	private double score = 0;
 	private String name = "";
 	private CardList cardsInHand = new CardList();
-	private int played = 0;
-	private int win = 0;
+//	private int played = 0;
+//	private int win = 0;
 	private String sol = "";
 	
 	/**
@@ -186,18 +186,18 @@ public class CardGamePlayer {
 		}
 	}
 	
-	void addWinGame(){
-		this.win ++;
-	}
-	
-	void addPlayedGame(){
-		this.played ++;
-	}
-	
-	float getWinRate(){
-		if(this.played == 0)
-			return 0.0f;
-		else
-			return ((float)this.win/(float)this.played);
-	}
+//	void addWinGame(){
+//		this.win ++;
+//	}
+//	
+//	void addPlayedGame(){
+//		this.played ++;
+//	}
+//	
+//	float getWinRate(){
+//		if(this.played == 0)
+//			return 0.0f;
+//		else
+//			return ((float)this.win/(float)this.played);
+//	}
 }

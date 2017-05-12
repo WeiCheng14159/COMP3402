@@ -10,24 +10,22 @@ import javax.jms.MessageProducer;
 import javax.swing.*;
 
 public class ProfilePagePanel extends JPanel{
-	private String name = "";
+	private String _user_name = "";
 	private PokerGameApp app;
+	private String host = "";
 	
-	public ProfilePagePanel(String _host, String _name ){
-		this.name = _name;
-		JNDI_init(_host);
+	public ProfilePagePanel(String _host){
+		this.host = _host;
+		JNDI_init( host );
 		init_gui();
 	}
+	
 	/**
 	 * initialize panel GUI
 	 */
 	private void init_gui(){
 		this.setLayout( new BorderLayout() );
-		try {
-			this.add( app.profile( name ) , BorderLayout.NORTH);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
+		this.add( new JLabel("Init") , BorderLayout.NORTH);
 		this.setVisible(true);
 	}
 	
@@ -39,20 +37,35 @@ public class ProfilePagePanel extends JPanel{
     	try {
 			Registry registry = LocateRegistry.getRegistry( _host );
 			app = (PokerGameApp)registry.lookup("PokerGameApp");
-			System.out.println( app.toString() );
 		} catch(Exception ex) {
 		    System.err.println("Failed accessing RMI:"+ex);
 		    return;
 		}
     }
     
-    public void update_name(String _host, String _name){
+    public void update_profile( String _name ){
+    	_user_name = _name;
     	this.removeAll();
     	try {
-			this.add( app.profile( _name ) , BorderLayout.NORTH);
+			this.add( app.profile( _user_name ) , BorderLayout.NORTH);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
+    	this.revalidate();
+    	this.repaint();
+    }
+    
+    public void refresh(){
+    	this.removeAll();
+    	if( _user_name != "" ){
+    		try {
+    			this.add( app.profile( _user_name ) , BorderLayout.NORTH);
+    		} catch (RemoteException e) {
+    			e.printStackTrace();
+    		}
+    	}else{
+    		this.add( new JLabel("") );
+    	}
     	this.revalidate();
     	this.repaint();
     }
